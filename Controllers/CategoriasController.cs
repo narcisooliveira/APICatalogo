@@ -20,8 +20,8 @@ namespace APICatalogo.Controllers
         [HttpGet]
         public ActionResult<List<Categoria>> Index()
         {
-            // Melhorando a performance com AsNoTracking()
-            var apiCatalogoContext = _context.Categorias?.AsNoTracking().ToList();
+            // Melhorando a performance com AsNoTracking() e restrinjindo a quantidade de registros com Take(10)
+            var apiCatalogoContext = _context.Categorias?.AsNoTracking().Take(10).ToList();
 
             if (apiCatalogoContext == null)
             {
@@ -54,9 +54,9 @@ namespace APICatalogo.Controllers
         [HttpGet("produtos")]
         public ActionResult<IEnumerable<Produto>>  Produtos()
         {
-            // Melhorando a performance com AsNoTracking() e usando filtro Where para trazer apenas os 5 primeiros Ids de Categoria para melhorar a performance.
+            // Melhorando a performance com AsNoTracking(), usando filtro Where para trazer apenas os 5 primeiros Ids de Categoria e restrinjindo a quantidade de registros com Take(10) para melhorar a performance.
             var produtos = _context.Produtos?
-                .Include(x => x.Categoria).Where(x => x.CategoriaId <= 5).AsNoTracking().ToList();
+                .Include(x => x.Categoria).Where(x => x.CategoriaId <= 5).AsNoTracking().Take(10).ToList();
 
             if (produtos == null)
             {

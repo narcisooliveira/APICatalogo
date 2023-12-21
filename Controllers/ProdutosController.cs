@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using APICatalogo.Context;
 using APICatalogo.Models;
@@ -25,8 +20,8 @@ namespace APICatalogo.Controllers
         [HttpGet]
         public ActionResult<List<Produto>> Index()
         {
-            // Melhorando a performance com AsNoTracking()
-            var apiCatalogoContext = _context.Produtos?.AsNoTracking().ToList();
+            // Melhorando a performance com AsNoTracking() e restrinjindo a quantidade de registros com Take(10)
+            var apiCatalogoContext = _context.Produtos?.AsNoTracking().Take(10).ToList();
 
             if (apiCatalogoContext == null)
             {
