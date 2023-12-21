@@ -29,7 +29,7 @@ namespace APICatalogo.Controllers
 
             if (apiCatalogoContext == null)
             {
-                return NotFound();
+                return NotFound("Produtos não encontrado!");
             }
 
             return Ok(apiCatalogoContext.ToList());
@@ -41,7 +41,7 @@ namespace APICatalogo.Controllers
         {
             if (id == null || _context.Produtos == null)
             {
-                return NotFound();
+                return NotFound("Produto não encontrado!");
             }
 
             var produto = await _context.Produtos
@@ -66,7 +66,7 @@ namespace APICatalogo.Controllers
                 _context.Add(produto);
                 await _context.SaveChangesAsync();
                 
-                return new CreatedAtRouteResult("ObterProduto", new { id = produto.ProdutoId }, produto);
+                return Ok(produto);
             }
 
             return BadRequest();
@@ -77,7 +77,7 @@ namespace APICatalogo.Controllers
         public async Task<IActionResult> Edit(int id, Produto produto)
         {
             if (id != produto.ProdutoId || _context.Produtos == null)
-                return NotFound();
+                return NotFound("Produto não encontrado!");
 
             if (ModelState.IsValid)
             {
@@ -110,7 +110,7 @@ namespace APICatalogo.Controllers
         {
             if (id == null || _context.Produtos == null)
             {
-                return NotFound();
+                return NotFound("Produto não encontrado!");
             }
 
             var produto = await _context.Produtos
@@ -118,7 +118,7 @@ namespace APICatalogo.Controllers
 
             if (produto == null)
             {
-                return NotFound();
+                return NotFound("Produto não encontrado!");
             }
 
             _context.Produtos.Remove(produto);
