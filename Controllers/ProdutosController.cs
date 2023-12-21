@@ -25,7 +25,8 @@ namespace APICatalogo.Controllers
         [HttpGet]
         public ActionResult<List<Produto>> Index()
         {
-            var apiCatalogoContext = _context.Produtos?.ToList();
+            // Melhorando a performance com AsNoTracking()
+            var apiCatalogoContext = _context.Produtos?.AsNoTracking().ToList();
 
             if (apiCatalogoContext == null)
             {
@@ -35,7 +36,7 @@ namespace APICatalogo.Controllers
             return Ok(apiCatalogoContext.ToList());
         }
 
-        //GET: Produtos/Details/5
+        //GET: Produtos/Details
         [HttpGet("{id}")]
         public async Task<IActionResult> Details(int? id)
         {
@@ -44,7 +45,8 @@ namespace APICatalogo.Controllers
                 return NotFound("Produto não encontrado!");
             }
 
-            var produto = await _context.Produtos
+            // Melhorando a performance com AsNoTracking()
+            var produto = await _context.Produtos.AsNoTracking()
                 .FirstOrDefaultAsync(m => m.ProdutoId == id);
             if (produto == null)
             {
