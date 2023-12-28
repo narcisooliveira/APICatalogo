@@ -25,7 +25,7 @@ namespace APICatalogo.Controllers
 
             if (apiCatalogoContext == null)
             {
-                return NotFound("Categorias não encontrado!");
+                return NotFound("Categorias não encontradas!");
             }
 
             return Ok(apiCatalogoContext.ToList());
@@ -37,7 +37,7 @@ namespace APICatalogo.Controllers
         {
             if (id == null || _context.Categorias == null)
             {
-                return NotFound("Categoria não encontrado!");
+                return NotFound("Categoria não encontrada!");
             }
 
             var Categoria = await _context.Categorias
@@ -60,7 +60,7 @@ namespace APICatalogo.Controllers
 
             if (produtos == null)
             {
-                return NotFound();
+                return NotFound("Produtos não encontrados.");
             }
 
             return Ok(produtos);
@@ -89,7 +89,7 @@ namespace APICatalogo.Controllers
         public async Task<IActionResult> Edit(int id, Categoria Categoria)
         {
             if (id != Categoria.CategoriaId || _context.Categorias == null)
-                return NotFound("Categoria não encontrado!");
+                return NotFound("Categoria não encontrada!");
 
             if (ModelState.IsValid)
             {
@@ -102,7 +102,7 @@ namespace APICatalogo.Controllers
                 {
                     if (!CategoriaExists(Categoria.CategoriaId))
                     {
-                        return NotFound();
+                        return NotFound("Categoria não encontrada.");
                     }
                     else
                     {
@@ -122,7 +122,7 @@ namespace APICatalogo.Controllers
         {
             if (id == null || _context.Categorias == null)
             {
-                return NotFound("Categoria não encontrado!");
+                return NotFound("Categoria não encontrada!");
             }
 
             var Categoria = await _context.Categorias
@@ -130,7 +130,7 @@ namespace APICatalogo.Controllers
 
             if (Categoria == null)
             {
-                return NotFound("Categoria não encontrado!");
+                return NotFound("Categoria não encontrada!");
             }
 
             _context.Categorias.Remove(Categoria);
