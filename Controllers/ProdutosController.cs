@@ -5,7 +5,7 @@ using APICatalogo.Models;
 
 namespace APICatalogo.Controllers
 {
-    [Route("[controller]")]
+    [Route("api")]
     [ApiController]
     public class ProdutosController : Controller
     {
@@ -17,7 +17,7 @@ namespace APICatalogo.Controllers
         }
 
         // GET: Produtos
-        [HttpGet]
+        [HttpGet("produtos")]
         public ActionResult<List<Produto>> Index()
         {
             // Melhorando a performance com AsNoTracking() e restrinjindo a quantidade de registros com Take(10)
@@ -32,7 +32,7 @@ namespace APICatalogo.Controllers
         }
 
         //GET: Produtos/Details
-        [HttpGet("{id}")]
+        [HttpGet("produto/{id}")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Produtos == null)
@@ -54,7 +54,7 @@ namespace APICatalogo.Controllers
         // POST: Produtos/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost("produto")]
         public async Task<IActionResult> Create(Produto produto)
         {
 
@@ -70,7 +70,7 @@ namespace APICatalogo.Controllers
         }
 
         // PUT: Produtos/Edit/{id}
-        [HttpPut("{id}")]
+        [HttpPut("produto/{id}")]
         public async Task<IActionResult> Edit(int id, Produto produto)
         {
             if (id != produto.ProdutoId || _context.Produtos == null)
@@ -102,7 +102,7 @@ namespace APICatalogo.Controllers
         }
 
         // DELETE: Produtos/Delete/{id}
-        [HttpDelete("{id}")]
+        [HttpDelete("produto/{id}")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Produtos == null)

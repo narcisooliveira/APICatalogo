@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers
 {
-    [Route("[controller]")]
+    [Route("api")]
     [ApiController]
     public class CategoriasController : Controller
     {
@@ -17,7 +17,8 @@ namespace APICatalogo.Controllers
         }
 
         // GET: Categorias
-        [HttpGet]
+        [HttpGet("categorias")]
+        [HttpGet("teste")]
         public ActionResult<List<Categoria>> Index()
         {
             // Melhorando a performance com AsNoTracking() e restrinjindo a quantidade de registros com Take(10)
@@ -32,7 +33,7 @@ namespace APICatalogo.Controllers
         }
 
         // GET: Categorias/Details
-        [HttpGet("{id}")]
+        [HttpGet("categoria/{id:int:min(1)}")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null || _context.Categorias == null)
@@ -51,7 +52,7 @@ namespace APICatalogo.Controllers
         }
 
         // GET: Produtos/Categorias
-        [HttpGet("produtos")]
+        [HttpGet("produtos/categorias")]
         public ActionResult<IEnumerable<Produto>>  Produtos()
         {
             // Melhorando a performance com AsNoTracking(), usando filtro Where para trazer apenas os 5 primeiros Ids de Categoria e restrinjindo a quantidade de registros com Take(10) para melhorar a performance.
@@ -69,7 +70,7 @@ namespace APICatalogo.Controllers
         // POST: Categorias/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost("categoria")]
         public async Task<IActionResult> Create(Categoria Categoria)
         {
 
@@ -85,7 +86,7 @@ namespace APICatalogo.Controllers
         }
 
         // PUT: Categorias/Edit/{id}
-        [HttpPut("{id}")]
+        [HttpPut("categoria/{id}")]
         public async Task<IActionResult> Edit(int id, Categoria Categoria)
         {
             if (id != Categoria.CategoriaId || _context.Categorias == null)
@@ -117,7 +118,7 @@ namespace APICatalogo.Controllers
         }
 
         // DELETE: Categorias/Delete/{id}
-        [HttpDelete("{id}")]
+        [HttpDelete("categoria/{id}")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null || _context.Categorias == null)
