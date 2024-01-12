@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using APICatalogo.Context;
 using APICatalogo.Models;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace APICatalogo.Controllers
 {
@@ -18,10 +19,10 @@ namespace APICatalogo.Controllers
 
         // GET: Produtos
         [HttpGet("produtos")]
-        public ActionResult<List<Produto>> Index()
+        public async Task<ActionResult<List<Produto>>> Index()
         {
             // Melhorando a performance com AsNoTracking() e restrinjindo a quantidade de registros com Take(10)
-            var apiCatalogoContext = _context.Produtos?.AsNoTracking().Take(10).ToList();
+            var apiCatalogoContext = await _context.Produtos?.AsNoTracking().Take(10).ToListAsync();
 
             if (apiCatalogoContext == null)
             {
@@ -33,7 +34,7 @@ namespace APICatalogo.Controllers
 
         //GET: Produtos/Details
         [HttpGet("produto/{id}")]
-        public async Task<IActionResult> Details(int? id)
+        public async Task<ActionResult<Produto>> Details([FromQuery] int? id)
         {
             if (id == null || _context.Produtos == null)
             {

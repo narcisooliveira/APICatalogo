@@ -1,6 +1,8 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Models;
+using APICatalogo.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers
@@ -14,6 +16,12 @@ namespace APICatalogo.Controllers
         public CategoriasController(ApiCatalogoContext context)
         {
             _context = context;
+        }
+
+        [HttpGet("saudacao/{nome}")]
+        public ActionResult<string> GetSaudacao([FromServices] IMeuServico meuServico, [BindRequired] string nome)
+        {
+            return meuServico.Saudacao(nome);
         }
 
         // GET: Categorias
@@ -33,8 +41,8 @@ namespace APICatalogo.Controllers
         }
 
         // GET: Categorias/Details
-        [HttpGet("categoria/{id:int:min(1)}")]
-        public async Task<IActionResult> Details(int? id)
+        [HttpGet("categoria/{id:int:min(1)}", Name = "ObterProduto")]
+        public async Task<ActionResult<Categoria>> Details(int? id, [BindRequired] string? name)
         {
             if (id == null || _context.Categorias == null)
             {
@@ -42,7 +50,7 @@ namespace APICatalogo.Controllers
             }
 
             var Categoria = await _context.Categorias
-                .FirstOrDefaultAsync(m => m.CategoriaId == id);
+                .FirstOrDefaultAsync(m => m.CategoriaId == id || m.Nome.Equals(name));
             if (Categoria == null)
             {
                 return NotFound();
