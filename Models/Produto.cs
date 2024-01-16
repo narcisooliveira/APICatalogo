@@ -1,16 +1,18 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations;
+using APICatalogo.Validations;
 
 namespace APICatalogo.Models
 {
-    public class Produto
+    public class Produto : IValidatableObject
     {
         [Key]
         public int ProdutoId { get; set; }
 
         [Required]
         [StringLength(80, ErrorMessage = "O nome deve ter entre 5 e 80 caracteres", MinimumLength = 5)]
+        [PrimeiraLetraMaiuscula]
         [Column(TypeName = "varchar(80)")]
         public string? Nome { get; set; }
 
@@ -34,5 +36,32 @@ namespace APICatalogo.Models
 
         [JsonIgnore]
         public Categoria? Categoria { get; set; } // Navigation Property
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (!string.IsNullOrEmpty(Descricao))
+            {
+                var primeiraLetra = Descricao[0].ToString();
+
+                if (primeiraLetra != primeiraLetra.ToUpper())
+                {
+                    yield return new ValidationResult("A primeira letra da descrição do produto deve ser maiúscula",
+                        new[]
+                        {
+                            nameof(Descricao)
+                        });
+                }
+            }
+
+            if (Estoque <= 0)
+            {
+                yield return new ValidationResult("O estoque deve ser maior que zero",
+                    new[]
+                    {
+                        nameof(Estoque)
+                    });
+            }
+
+        }
     }
 }
