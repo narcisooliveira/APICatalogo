@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using APICatalogo.Context;
 using APICatalogo.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using APICatalogo.Filters;
 
 namespace APICatalogo.Controllers
 {
@@ -19,6 +20,7 @@ namespace APICatalogo.Controllers
 
         // GET: Produtos
         [HttpGet("produtos")]
+        [ServiceFilter(typeof(ApiLoggingFilter))]
         public async Task<ActionResult<List<Produto>>> Index()
         {
             // Melhorando a performance com AsNoTracking() e restrinjindo a quantidade de registros com Take(10)
