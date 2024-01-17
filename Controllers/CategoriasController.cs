@@ -12,10 +12,20 @@ namespace APICatalogo.Controllers
     public class CategoriasController : Controller
     {
         private readonly ApiCatalogoContext _context;
+        private readonly IConfiguration _configuration;
 
-        public CategoriasController(ApiCatalogoContext context)
+        public CategoriasController(ApiCatalogoContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
+        }
+
+        [HttpGet("autor")]
+        public string GetAutor()
+        {
+            var autor = _configuration["autor"];
+            var conexao = _configuration["ConnectionStrings:DefaultConnection"];
+            return $"Autor: {autor} - Conexão: {conexao}";
         }
 
         [HttpGet("saudacao/{nome}")]
