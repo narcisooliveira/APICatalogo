@@ -1,6 +1,7 @@
 using APICatalogo.Context;
 using APICatalogo.Extensions;
 using APICatalogo.Filters;
+using APICatalogo.Logging;
 using APICatalogo.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
@@ -38,6 +39,11 @@ var loggerFactory = LoggerFactory.Create(builder =>
 });
 
 app.ConfigureExceptionHandler(loggerFactory);
+
+loggerFactory.AddProvider(new CustomLoggerProvider(new CustomLoggerProviderConfiguration
+{
+    LogLevel = LogLevel.Information
+}));
 
 app.UseHttpsRedirection();
 

@@ -12,10 +12,12 @@ namespace APICatalogo.Controllers
     public class ProdutosController : Controller
     {
         private readonly ApiCatalogoContext _context;
+        private readonly ILogger _logger;
 
-        public ProdutosController(ApiCatalogoContext context)
+        public ProdutosController(ApiCatalogoContext context, ILogger<ProdutosController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: Produtos
@@ -36,8 +38,10 @@ namespace APICatalogo.Controllers
 
         //GET: Produtos/Details
         [HttpGet("produto/{id}")]
-        public async Task<ActionResult<Produto>> Details([FromQuery] int? id)
+        public async Task<ActionResult<Produto>> Details(int? id)
         {
+            _logger.LogInformation($"GET api/produto/{id} foi solicitado");
+
             if (id == null || _context.Produtos == null)
             {
                 return NotFound("Produto não encontrado!");
