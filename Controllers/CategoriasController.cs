@@ -1,5 +1,6 @@
 ﻿using APICatalogo.Context;
 using APICatalogo.Models;
+using APICatalogo.Repository;
 using APICatalogo.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -11,12 +12,12 @@ namespace APICatalogo.Controllers
     [ApiController]
     public class CategoriasController : Controller
     {
-        private readonly ApiCatalogoContext _context;
+        private readonly IUnitOfWork _uof;
         private readonly IConfiguration _configuration;
 
-        public CategoriasController(ApiCatalogoContext context, IConfiguration configuration)
+        public CategoriasController(IUnitOfWork unitOfWork, IConfiguration configuration)
         {
-            _context = context;
+            _uof = unitOfWork;
             _configuration = configuration;
         }
 
@@ -37,30 +38,30 @@ namespace APICatalogo.Controllers
         // GET: Categorias
         [HttpGet("categorias")]
         [HttpGet("teste")]
-        public ActionResult<List<Categoria>> Index()
+        public ActionResult<IEnumerable<Categoria>> Index()
         {
             // Melhorando a performance com AsNoTracking() e restrinjindo a quantidade de registros com Take(10)
-            var apiCatalogoContext = _context.Categorias?.AsNoTracking().Take(10).ToList();
+            var apiCatalogoContext = _uof.CategoriaRepository.Get().ToList();
 
             if (apiCatalogoContext == null)
             {
                 return NotFound("Categorias não encontradas!");
             }
 
-            return Ok(apiCatalogoContext.ToList());
+            return Ok(apiCatalogoContext);
         }
 
         // GET: Categorias/Details
         [HttpGet("categoria/{id:int:min(1)}", Name = "ObterProduto")]
-        public async Task<ActionResult<Categoria>> Details(int? id, [BindRequired] string? name)
+        public ActionResult<Categoria> Details(int? id, [BindRequired] string? name)
         {
-            if (id == null || _context.Categorias == null)
+            if (id == null || string.IsNullOrEmpty(name))
             {
                 return NotFound("Categoria não encontrada!");
             }
 
-            var Categoria = await _context.Categorias
-                .FirstOrDefaultAsync(m => m.CategoriaId == id || m.Nome.Equals(name));
+            var Categoria = _uof.CategoriaRepository.GetById(m => m.CategoriaId == id || m.Nome.Equals(name));
+
             if (Categoria == null)
             {
                 return NotFound();
@@ -74,8 +75,7 @@ namespace APICatalogo.Controllers
         public ActionResult<IEnumerable<Produto>>  Produtos()
         {
             // Melhorando a performance com AsNoTracking(), usando filtro Where para trazer apenas os 5 primeiros Ids de Categoria e restrinjindo a quantidade de registros com Take(10) para melhorar a performance.
-            var produtos = _context.Produtos?
-                .Include(x => x.Categoria).Where(x => x.CategoriaId <= 5).AsNoTracking().Take(10).ToList();
+            var produtos = _uof.CategoriaRepository.GetCategoriasProdutos().ToList();
 
             if (produtos == null)
             {
@@ -89,14 +89,13 @@ namespace APICatalogo.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("categoria")]
-        public async Task<IActionResult> Create(Categoria Categoria)
+        public ActionResult Create(Categoria Categoria)
         {
 
             if (ModelState.IsValid)
             {
-                _context.Add(Categoria);
-                await _context.SaveChangesAsync();
-
+                _uof.CategoriaRepository.Add(Categoria);
+                _uof.Commit();
                 return Ok(Categoria);
             }
 
@@ -105,17 +104,17 @@ namespace APICatalogo.Controllers
 
         // PUT: Categorias/Edit/{id}
         [HttpPut("categoria/{id}")]
-        public async Task<IActionResult> Edit(int id, Categoria Categoria)
+        public  ActionResult Edit(int id, Categoria Categoria)
         {
-            if (id != Categoria.CategoriaId || _context.Categorias == null)
+            if (id != Categoria.CategoriaId)
                 return NotFound("Categoria não encontrada!");
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(Categoria);
-                    await _context.SaveChangesAsync();
+                    _uof.CategoriaRepository.Update(Categoria);
+                    _uof.Commit();
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
@@ -137,30 +136,29 @@ namespace APICatalogo.Controllers
 
         // DELETE: Categorias/Delete/{id}
         [HttpDelete("categoria/{id}")]
-        public async Task<IActionResult> Delete(int? id)
+        public ActionResult Delete(int? id)
         {
-            if (id == null || _context.Categorias == null)
+            if (id == null)
             {
                 return NotFound("Categoria não encontrada!");
             }
 
-            var Categoria = await _context.Categorias
-                .FirstOrDefaultAsync(m => m.CategoriaId == id);
+            var Categoria = _uof.CategoriaRepository.GetById(m => m.CategoriaId == id);
 
             if (Categoria == null)
             {
                 return NotFound("Categoria não encontrada!");
             }
 
-            _context.Categorias.Remove(Categoria);
-            await _context.SaveChangesAsync();
+            _uof.CategoriaRepository.Delete(Categoria);
+            _uof.Commit();
 
             return Ok(Categoria);
         }
 
         private bool CategoriaExists(int id)
         {
-            return (_context.Categorias?.Any(e => e.CategoriaId == id)).GetValueOrDefault();
+            return id.Equals(_uof.CategoriaRepository.GetById(e => e.CategoriaId == id));
         }
     }
 }
