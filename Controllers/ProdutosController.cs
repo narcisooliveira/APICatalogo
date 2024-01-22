@@ -4,52 +4,55 @@ using APICatalogo.Context;
 using APICatalogo.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using APICatalogo.Filters;
+using APICatalogo.Repository;
 
 namespace APICatalogo.Controllers
 {
     [Route("api")]
     [ApiController]
-    public class ProdutosController : Controller
+    public class ProdutoRepositoryController : Controller
     {
-        private readonly ApiCatalogoContext _context;
+        private readonly IUnitOfWork _uof;
         private readonly ILogger _logger;
 
-        public ProdutosController(ApiCatalogoContext context, ILogger<ProdutosController> logger)
+        public ProdutoRepositoryController(IUnitOfWork unitOfWork, ILogger<ProdutoRepositoryController> logger)
         {
-            _context = context;
+            _uof = unitOfWork;
             _logger = logger;
         }
 
-        // GET: Produtos
-        [HttpGet("produtos")]
+        // GET: ProdutoRepository
+        [HttpGet("Produtos")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult<List<Produto>>> Index()
+        public ActionResult<List<Produto>> Index()
         {
             // Melhorando a performance com AsNoTracking() e restrinjindo a quantidade de registros com Take(10)
-            var apiCatalogoContext = await _context.Produtos?.AsNoTracking().Take(10).ToListAsync();
+            var produtos = _uof.ProdutoRepository?.Get()
+                                                 .AsNoTracking()
+                                                 .Take(10)
+                                                 .ToList();
 
-            if (apiCatalogoContext == null)
+            if (produtos == null)
             {
                 return NotFound("Produtos não encontrado!");
             }
 
-            return Ok(apiCatalogoContext.ToList());
+            return Ok(produtos);
         }
 
-        //GET: Produtos/Details
+        //GET: ProdutoRepository/Details
         [HttpGet("produto/{id}")]
         public async Task<ActionResult<Produto>> Details(int? id)
         {
             _logger.LogInformation($"GET api/produto/{id} foi solicitado");
 
-            if (id == null || _context.Produtos == null)
+            if (id == null || _uof.ProdutoRepository == null)
             {
                 return NotFound("Produto não encontrado!");
             }
 
             // Melhorando a performance com AsNoTracking()
-            var produto = await _context.Produtos.AsNoTracking()
-                .FirstOrDefaultAsync(m => m.ProdutoId == id);
+            var produto = _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
             if (produto == null)
             {
                 return NotFound();
@@ -58,17 +61,17 @@ namespace APICatalogo.Controllers
             return Ok(produto);
         }
 
-        // POST: Produtos/Create
+        // POST: ProdutoRepository/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("produto")]
-        public async Task<IActionResult> Create(Produto produto)
+        public ActionResult Create(Produto produto)
         {
 
             if (ModelState.IsValid)
             {
-                _context.Add(produto);
-                await _context.SaveChangesAsync();
+                _uof.ProdutoRepository.Add(produto);
+                _uof.Commit();
                 
                 return Ok(produto);
             }
@@ -76,19 +79,19 @@ namespace APICatalogo.Controllers
             return BadRequest();
         }
 
-        // PUT: Produtos/Edit/{id}
+        // PUT: ProdutoRepository/Edit/{id}
         [HttpPut("produto/{id}")]
-        public async Task<IActionResult> Edit(int id, Produto produto)
+        public ActionResult Edit(int id, Produto produto)
         {
-            if (id != produto.ProdutoId || _context.Produtos == null)
+            if (id != produto.ProdutoId)
                 return NotFound("Produto não encontrado!");
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(produto);
-                    await _context.SaveChangesAsync();
+                    _uof.ProdutoRepository.Update(produto);
+                    _uof.Commit();
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
@@ -108,32 +111,31 @@ namespace APICatalogo.Controllers
             return BadRequest();
         }
 
-        // DELETE: Produtos/Delete/{id}
+        // DELETE: ProdutoRepository/Delete/{id}
         [HttpDelete("produto/{id}")]
-        public async Task<IActionResult> Delete(int? id)
+        public ActionResult Delete(int? id)
         {
-            if (id == null || _context.Produtos == null)
+            if (id == null || _uof.ProdutoRepository == null)
             {
                 return NotFound("Produto não encontrado!");
             }
 
-            var produto = await _context.Produtos
-                .FirstOrDefaultAsync(m => m.ProdutoId == id);
+            var produto = _uof.ProdutoRepository.GetById(m => m.ProdutoId == id);
 
             if (produto == null)
             {
                 return NotFound("Produto não encontrado!");
             }
 
-            _context.Produtos.Remove(produto);
-            await _context.SaveChangesAsync();
+            _uof.ProdutoRepository.Delete(produto);
+            _uof.Commit();
 
             return Ok(produto);
         }
 
         private bool ProdutoExists(int id)
         {
-            return (_context.Produtos?.Any(e => e.ProdutoId == id)).GetValueOrDefault();
+            return (_uof.ProdutoRepository.Get().Any(e => e.ProdutoId == id));
         }
     }
 }
