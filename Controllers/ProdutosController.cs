@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using APICatalogo.Context;
 using APICatalogo.Models;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using APICatalogo.Filters;
 using APICatalogo.Repository;
 
