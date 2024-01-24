@@ -1,7 +1,9 @@
-﻿using APICatalogo.Context;
+﻿using APICatalogo.DTOs;
+using APICatalogo.Filters;
 using APICatalogo.Models;
 using APICatalogo.Repository;
 using APICatalogo.Services;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +16,15 @@ namespace APICatalogo.Controllers
     {
         private readonly IUnitOfWork _uof;
         private readonly IConfiguration _configuration;
+        private readonly ILogger _logger;
+        private readonly IMapper _mapper;
 
-        public CategoriasController(IUnitOfWork unitOfWork, IConfiguration configuration)
+        public CategoriasController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger logger, IMapper mapper)
         {
             _uof = unitOfWork;
             _configuration = configuration;
+            _logger = logger;
+            _mapper = mapper;
         }
 
         [HttpGet("autor")]
@@ -38,125 +44,158 @@ namespace APICatalogo.Controllers
         // GET: Categorias
         [HttpGet("categorias")]
         [HttpGet("teste")]
-        public ActionResult<IEnumerable<Categoria>> Index()
+        [ServiceFilter(typeof(ApiLoggingFilter))]
+        public ActionResult<IEnumerable<CategoriaDTO>> GetAll()
         {
+            _logger.LogInformation($"GET api/categorias foi solicitado");
+
             // Melhorando a performance com AsNoTracking() e restrinjindo a quantidade de registros com Take(10)
-            var apiCatalogoContext = _uof.CategoriaRepository.Get().ToList();
+            var categorias = _uof.CategoriaRepository.Get().ToList();
 
-            if (apiCatalogoContext == null)
-            {
+            if (categorias == null)
                 return NotFound("Categorias não encontradas!");
-            }
 
-            return Ok(apiCatalogoContext);
+            var categoriaDTOs = _mapper.Map<List<CategoriaDTO>>(categorias);
+
+            _logger.LogInformation($"GET api/categorias retornou {categorias.Count} categorias");
+
+            return Ok(categoriaDTOs);
         }
 
         // GET: Categorias/Details
         [HttpGet("categoria/{id:int:min(1)}", Name = "ObterProduto")]
-        public ActionResult<Categoria> Details(int? id, [BindRequired] string? name)
+        [ServiceFilter(typeof(ApiLoggingFilter))]
+        public ActionResult<CategoriaDTO> Details(int? id, [BindRequired] string? name)
         {
+            _logger.LogInformation($"GET api/categoria/{id} foi solicitado");
+
             if (id == null || string.IsNullOrEmpty(name))
-            {
                 return NotFound("Categoria não encontrada!");
-            }
 
             var Categoria = _uof.CategoriaRepository.GetById(m => m.CategoriaId == id || m.Nome.Equals(name));
 
             if (Categoria == null)
-            {
                 return NotFound();
-            }
 
-            return Ok(Categoria);
+            _logger.LogInformation($"GET api/categoria/{id} retornou a categoria {Categoria.Nome}");
+
+            var categoriaDTO = _mapper.Map<CategoriaDTO>(Categoria);
+
+            return Ok(categoriaDTO);
         }
 
         // GET: Produtos/Categorias
         [HttpGet("produtos/categorias")]
-        public ActionResult<IEnumerable<Produto>>  Produtos()
+        [ServiceFilter(typeof(ApiLoggingFilter))]
+        public ActionResult<IEnumerable<ProdutoDTO>> Produtos()
         {
+            _logger.LogInformation($"GET api/produtos/categorias foi solicitado");
+
             // Melhorando a performance com AsNoTracking(), usando filtro Where para trazer apenas os 5 primeiros Ids de Categoria e restrinjindo a quantidade de registros com Take(10) para melhorar a performance.
             var produtos = _uof.CategoriaRepository.GetCategoriasProdutos().ToList();
 
             if (produtos == null)
-            {
                 return NotFound("Produtos não encontrados.");
-            }
 
-            return Ok(produtos);
+            _logger.LogInformation($"GET api/produtos/categorias retornou {produtos.Count} produtos");
+
+            var produtosDTOs = _mapper.Map<List<ProdutoDTO>>(produtos);
+
+            return Ok(produtosDTOs);
         }
-        
+
         // POST: Categorias/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("categoria")]
-        public ActionResult Create(Categoria Categoria)
+        [ServiceFilter(typeof(ApiLoggingFilter))]
+        public ActionResult Create(CategoriaDTO CategoriaDto)
         {
+            _logger.LogInformation($"POST api/categoria foi solicitado");
 
             if (ModelState.IsValid)
             {
-                _uof.CategoriaRepository.Add(Categoria);
+                var categoria = _mapper.Map<Categoria>(CategoriaDto);
+
+                _uof.CategoriaRepository.Add(categoria);
                 _uof.Commit();
-                return Ok(Categoria);
+
+                _logger.LogInformation($"POST api/categoria foi criado com sucesso");
+
+                return Ok(categoria);
             }
+
+            _logger.LogInformation($"POST api/categoria não foi criado");
 
             return BadRequest();
         }
 
         // PUT: Categorias/Edit/{id}
         [HttpPut("categoria/{id}")]
-        public  ActionResult Edit(int id, Categoria Categoria)
+        [ServiceFilter(typeof(ApiLoggingFilter))]
+        public ActionResult Edit(int id, CategoriaDTO categoriaDto)
         {
-            if (id != Categoria.CategoriaId)
+            _logger.LogInformation($"PUT api/categoria/{id} foi solicitado");
+
+            if (id != categoriaDto.CategoriaId)
                 return NotFound("Categoria não encontrada!");
 
             if (ModelState.IsValid)
             {
+                var categoria = _mapper.Map<Categoria>(categoriaDto);
+
                 try
                 {
-                    _uof.CategoriaRepository.Update(Categoria);
+                    _uof.CategoriaRepository.Update(categoria);
                     _uof.Commit();
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    if (!CategoriaExists(Categoria.CategoriaId))
-                    {
+                    if (!Exists(categoria.CategoriaId))
                         return NotFound("Categoria não encontrada.");
-                    }
                     else
                     {
+                        _logger.LogError($"PUT api/categoria/{id} Erro ao atualizar Categoria {ex.Message}");
                         throw new Exception($"Erro ao atualizar Categoria {ex.Message}");
                     }
                 }
 
-                return Ok(Categoria);
+                _logger.LogInformation($"PUT api/categoria/{id} foi atualizado com sucesso");
+
+                return Ok(categoriaDto);
             }
+
+            _logger.LogInformation($"PUT api/categoria/{id} não foi atualizado");
 
             return BadRequest();
         }
 
         // DELETE: Categorias/Delete/{id}
         [HttpDelete("categoria/{id}")]
+        [ServiceFilter(typeof(ApiLoggingFilter))]
         public ActionResult Delete(int? id)
         {
+            _logger.LogInformation($"DELETE api/categoria/{id} foi solicitado");
+
             if (id == null)
-            {
                 return NotFound("Categoria não encontrada!");
-            }
 
-            var Categoria = _uof.CategoriaRepository.GetById(m => m.CategoriaId == id);
+            var categoria = _uof.CategoriaRepository.GetById(m => m.CategoriaId == id);
 
-            if (Categoria == null)
-            {
+            if (categoria == null)
                 return NotFound("Categoria não encontrada!");
-            }
 
-            _uof.CategoriaRepository.Delete(Categoria);
+            _uof.CategoriaRepository.Delete(categoria);
             _uof.Commit();
 
-            return Ok(Categoria);
+            _logger.LogInformation($"DELETE api/categoria/{id} foi deletado com sucesso");
+
+            var categoriaDto = _mapper.Map<CategoriaDTO>(categoria);
+
+            return Ok(categoriaDto);
         }
 
-        private bool CategoriaExists(int id)
+        private bool Exists(int id)
         {
             return id.Equals(_uof.CategoriaRepository.GetById(e => e.CategoriaId == id));
         }
