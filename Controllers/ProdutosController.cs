@@ -12,13 +12,13 @@ namespace APICatalogo.Controllers
 {
     [Route("api")]
     [ApiController]
-    public class ProdutoRepositoryController : Controller
+    public class ProdutosController : Controller
     {
         private readonly IUnitOfWork _uof;
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
 
-        public ProdutoRepositoryController(IUnitOfWork unitOfWork, ILogger<ProdutoRepositoryController> logger, IMapper mapper)
+        public ProdutosController(IUnitOfWork unitOfWork, ILogger<ProdutosController> logger, IMapper mapper)
         {
             _uof = unitOfWork;
             _logger = logger;

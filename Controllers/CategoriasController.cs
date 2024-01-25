@@ -21,7 +21,7 @@ namespace APICatalogo.Controllers
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
 
-        public CategoriasController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger logger, IMapper mapper)
+        public CategoriasController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger<CategoriasController> logger, IMapper mapper)
         {
             _uof = unitOfWork;
             _configuration = configuration;
