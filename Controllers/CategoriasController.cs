@@ -1,12 +1,14 @@
 ﻿using APICatalogo.DTOs;
 using APICatalogo.Filters;
 using APICatalogo.Models;
+using APICatalogo.Pagination;
 using APICatalogo.Repository;
 using APICatalogo.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace APICatalogo.Controllers
 {
@@ -19,7 +21,7 @@ namespace APICatalogo.Controllers
         private readonly ILogger _logger;
         private readonly IMapper _mapper;
 
-        public CategoriasController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger logger, IMapper mapper)
+        public CategoriasController(IUnitOfWork unitOfWork, IConfiguration configuration, ILogger<CategoriasController> logger, IMapper mapper)
         {
             _uof = unitOfWork;
             _configuration = configuration;
@@ -45,15 +47,20 @@ namespace APICatalogo.Controllers
         [HttpGet("categorias")]
         [HttpGet("teste")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult<IEnumerable<CategoriaDTO>> GetAll()
+        public ActionResult<IEnumerable<CategoriaDTO>> GetAll([FromQuery] CategoriaParameters categoriaParameters)
         {
             _logger.LogInformation($"GET api/categorias foi solicitado");
 
             // Melhorando a performance com AsNoTracking() e restrinjindo a quantidade de registros com Take(10)
-            var categorias = _uof.CategoriaRepository.Get().ToList();
+            var categorias = _uof.CategoriaRepository.GetCategorias(categoriaParameters);
 
             if (categorias == null)
+            {
+                _logger.LogError($"GET api/categorias não retornou categorias");
                 return NotFound("Categorias não encontradas!");
+            }
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(categorias.MetaData));
 
             var categoriaDTOs = _mapper.Map<List<CategoriaDTO>>(categorias);
 
@@ -70,12 +77,18 @@ namespace APICatalogo.Controllers
             _logger.LogInformation($"GET api/categoria/{id} foi solicitado");
 
             if (id == null || string.IsNullOrEmpty(name))
+            {
+                _logger.LogError($"GET api/categoria/{id} não retornou categorias");
                 return NotFound("Categoria não encontrada!");
+            }
 
             var Categoria = _uof.CategoriaRepository.GetById(m => m.CategoriaId == id || m.Nome.Equals(name));
 
             if (Categoria == null)
+            {
+                _logger.LogError($"GET api/categoria/{id} não retornou categorias");
                 return NotFound();
+            }
 
             _logger.LogInformation($"GET api/categoria/{id} retornou a categoria {Categoria.Nome}");
 
@@ -87,15 +100,20 @@ namespace APICatalogo.Controllers
         // GET: Produtos/Categorias
         [HttpGet("produtos/categorias")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult<IEnumerable<ProdutoDTO>> Produtos()
+        public ActionResult<IEnumerable<ProdutoDTO>> Produtos([FromQuery] CategoriaParameters categoriaParameters)
         {
             _logger.LogInformation($"GET api/produtos/categorias foi solicitado");
 
             // Melhorando a performance com AsNoTracking(), usando filtro Where para trazer apenas os 5 primeiros Ids de Categoria e restrinjindo a quantidade de registros com Take(10) para melhorar a performance.
-            var produtos = _uof.CategoriaRepository.GetCategoriasProdutos().ToList();
+            var produtos = _uof.CategoriaRepository.GetCategoriasProdutos(categoriaParameters);
 
             if (produtos == null)
+            {
+                _logger.LogError($"GET api/produtos/categorias não retornou produtos");
                 return NotFound("Produtos não encontrados.");
+            }
+
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(produtos.MetaData));
 
             _logger.LogInformation($"GET api/produtos/categorias retornou {produtos.Count} produtos");
 
@@ -152,7 +170,10 @@ namespace APICatalogo.Controllers
                 catch (DbUpdateConcurrencyException ex)
                 {
                     if (!Exists(categoria.CategoriaId))
+                    {
+                        _logger.LogError($"PUT api/categoria/{id} Categoria não encontrada. {ex.Message}");
                         return NotFound("Categoria não encontrada.");
+                    }
                     else
                     {
                         _logger.LogError($"PUT api/categoria/{id} Erro ao atualizar Categoria {ex.Message}");
@@ -178,12 +199,18 @@ namespace APICatalogo.Controllers
             _logger.LogInformation($"DELETE api/categoria/{id} foi solicitado");
 
             if (id == null)
+            {
+                _logger.LogError($"DELETE api/categoria/{id} Categoria não encontrada");
                 return NotFound("Categoria não encontrada!");
+            }
 
             var categoria = _uof.CategoriaRepository.GetById(m => m.CategoriaId == id);
 
             if (categoria == null)
+            {
+                _logger.LogError($"DELETE api/categoria/{id} Categoria não encontrada");
                 return NotFound("Categoria não encontrada!");
+            }
 
             _uof.CategoriaRepository.Delete(categoria);
             _uof.Commit();

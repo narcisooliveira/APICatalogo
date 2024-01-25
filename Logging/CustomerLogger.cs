@@ -27,7 +27,7 @@
             
         private static void WriteTextMessageToFile(string message)
         {
-            string path = @"c:\Downloads\log.txt";
+            string path = @"C:\Users\narci\Downloads\log.txt";
             using StreamWriter streamWriter = new(path, true);
             try
             {
