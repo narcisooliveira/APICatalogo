@@ -28,12 +28,12 @@ namespace APICatalogo.Controllers
         // GET: ProdutoRepository
         [HttpGet("Produtos")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult<IEnumerable<ProdutoDTO>> GetAll([FromQuery] ProdutosParameters produtosParameters)
+        public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetAll([FromQuery] ProdutosParameters produtosParameters)
         {
             _logger.LogInformation($"GET api/produtos foi solicitado");
 
             // Melhorando a performance com AsNoTracking() e restrinjindo a quantidade de registros com Take(10)
-            var produtos = _uof.ProdutoRepository.GetProdutos(produtosParameters);
+            var produtos = await _uof.ProdutoRepository.GetProdutos(produtosParameters);
 
             if (produtos == null)
                 return NotFound("Produtos não encontrado!");
@@ -50,14 +50,14 @@ namespace APICatalogo.Controllers
         //GET: ProdutoRepository/Details
         [HttpGet("produto/{id}")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult<Produto> GetById(int? id)
+        public async Task<ActionResult<Produto>> GetById(int? id)
         {
             _logger.LogInformation($"GET api/produto/{id} foi solicitado");
 
             if (id == null)
                 return NotFound("Produto não encontrado!");
 
-            var produto = _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
+            var produto = await _uof.ProdutoRepository.GetById(p => p.ProdutoId == id);
 
             if (produto == null)
                 return NotFound("Produto não encontrado!");         
@@ -74,7 +74,7 @@ namespace APICatalogo.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("produto")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult Create(ProdutoDTO produtoDto)
+        public async Task<ActionResult> Create(ProdutoDTO produtoDto)
         {
             _logger.LogInformation($"POST api/produto foi solicitado");
 
@@ -86,7 +86,7 @@ namespace APICatalogo.Controllers
             if (ModelState.IsValid)
             {
                 _uof.ProdutoRepository.Add(produto);
-                _uof.Commit();
+                await _uof.Commit();
 
                 _logger.LogInformation($"POST api/produto foi criado com sucesso");
 
@@ -99,7 +99,7 @@ namespace APICatalogo.Controllers
         // PUT: ProdutoRepository/Edit/{id}
         [HttpPut("produto/{id}")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult Edit(int id, [FromBody] ProdutoDTO produtoDto)
+        public async Task<ActionResult> Edit(int id, [FromBody] ProdutoDTO produtoDto)
         {
             if (id != produtoDto.ProdutoId)
                 return NotFound("Produto não informado!");
@@ -111,7 +111,7 @@ namespace APICatalogo.Controllers
                 try
                 {
                     _uof.ProdutoRepository.Update(produto);
-                    _uof.Commit();
+                    await _uof.Commit();
 
                     _logger.LogInformation($"PUT api/produto foi atualizado com sucesso");
                 }
@@ -136,18 +136,18 @@ namespace APICatalogo.Controllers
         // DELETE: ProdutoRepository/Delete/{id}
         [HttpDelete("produto/{id}")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult Delete(int? id)
+        public async Task<ActionResult> Delete(int? id)
         {
             if (id == null)
                 return NotFound("Produto não encontrado!");
 
-            var produto = _uof.ProdutoRepository.GetById(m => m.ProdutoId == id);
+            var produto = await _uof.ProdutoRepository.GetById(m => m.ProdutoId == id);
 
             if (produto == null)
                 return NotFound("Produto não encontrado!");
 
             _uof.ProdutoRepository.Delete(produto);
-            _uof.Commit();
+            await _uof.Commit();
 
             _logger.LogInformation($"DELETE api/produto foi deletado com sucesso");
 
@@ -158,7 +158,7 @@ namespace APICatalogo.Controllers
 
         private bool Exists(int id)
         {
-            return (_uof.ProdutoRepository.Get().Any(e => e.ProdutoId == id));
+            return _uof.ProdutoRepository.Get().Any(e => e.ProdutoId == id);
         }
     }
 }

@@ -29,15 +29,15 @@ namespace APICatalogo.Repository
             }
         }
 
-        public void Commit()
+        public async Task Commit()
         {
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         // Libera os recursos da memória que estão sendo utilizados pelo contexto
         public void Dispose()
         {
-               _context.Dispose();
+            _context.Dispose();
         }
     }
 }

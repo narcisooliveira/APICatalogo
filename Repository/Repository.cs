@@ -28,9 +28,9 @@ namespace APICatalogo.Repository
             return _dbContext.Set<Type>().AsNoTracking();
         }
            
-        public Type? GetById(Expression<Func<Type?, bool>> predicate)
+        public async Task<Type?> GetById(Expression<Func<Type?, bool>> predicate)
         {
-            return _dbContext.Set<Type>().SingleOrDefault(predicate);
+            return await _dbContext.Set<Type>().SingleOrDefaultAsync(predicate);
         }
 
         public void Update(Type entity)

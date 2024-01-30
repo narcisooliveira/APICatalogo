@@ -11,24 +11,24 @@ namespace APICatalogo.Repository
         {
         }
 
-        public PagedList<Categoria?> GetCategorias(CategoriaParameters categoriaParameters)
+        public async Task<PagedList<Categoria?>> GetCategorias(CategoriaParameters categoriaParameters)
         {
-            return PagedList<Categoria?>.ToPagedList(Get().OrderBy(on => on.CategoriaId),
+            return await PagedList<Categoria?>.ToPagedList(Get().OrderBy(on => on.CategoriaId),
                                               categoriaParameters.PageNumber,
                                               categoriaParameters.PageSize);           
         }
 
-        public IEnumerable<Categoria?> GetCategoriasProdutos()
+        public async Task<IEnumerable<Categoria?>> GetCategoriasProdutos()
         {
-            return Get().Include(x => x.Produtos);
+            return await Get().Include(x => x.Produtos).ToListAsync();
         }
 
-        public PagedList<Categoria?> GetCategoriasProdutos(CategoriaParameters categoriaParameters)
+        public async Task<PagedList<Categoria?>> GetCategoriasProdutos(CategoriaParameters categoriaParameters)
         {
-            return PagedList<Categoria?>.ToPagedList(Get().Include(x => x.Produtos)
-                                                            .OrderBy(on => on.CategoriaId),
-                                                            categoriaParameters.PageNumber,
-                                                            categoriaParameters.PageSize);
+            return await PagedList<Categoria?>.ToPagedList(Get().Include(x => x.Produtos)
+                                                                .OrderBy(on => on.CategoriaId),
+                                                                categoriaParameters.PageNumber,
+                                                                categoriaParameters.PageSize);     
             
         }
     }
