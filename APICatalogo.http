@@ -1,0 +1,14 @@
+﻿@APICatalogo_HostAddress = https://localhost:7074
+
+GET {{APICatalogo_HostAddress}}/api/autor
+
+###
+
+POST {{APICatalogo_HostAddress}}/api/categoria
+Content-Type: application/json
+
+{
+  //CategoriaDTO
+}
+
+###
