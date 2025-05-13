@@ -8,6 +8,7 @@ using APICatalogo.Services;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,10 @@ builder.Services.AddControllers().AddJsonOptions(configure =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApiCatalogoContext>()
+    .AddDefaultTokenProviders();
 
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
