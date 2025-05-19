@@ -28,7 +28,7 @@ namespace APICatalogo.Controllers
         // GET: ProdutoRepository
         [HttpGet("Produtos")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetAll([FromQuery] ProdutosParameters produtosParameters)
+        public async Task<ActionResult<IEnumerable<ProdutoDto>>> GetAll([FromQuery] ProdutosParameters produtosParameters)
         {
             _logger.LogInformation($"GET api/produtos foi solicitado");
 
@@ -42,7 +42,7 @@ namespace APICatalogo.Controllers
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(produtos.MetaData));
 
-            var produtosDto = _mapper.Map<List<ProdutoDTO>>(produtos);
+            var produtosDto = _mapper.Map<List<ProdutoDto>>(produtos);
 
             return Ok(produtosDto);
         }
@@ -64,7 +64,7 @@ namespace APICatalogo.Controllers
 
             _logger.LogInformation($"GET api/produto/{id} retornou o produto {produto.Nome}");
 
-            var produtoDto = _mapper.Map<ProdutoDTO>(produto);
+            var produtoDto = _mapper.Map<ProdutoDto>(produto);
 
             return Ok(produtoDto);
         }
@@ -74,7 +74,7 @@ namespace APICatalogo.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("produto")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult> Create(ProdutoDTO produtoDto)
+        public async Task<ActionResult> Create(ProdutoDto produtoDto)
         {
             _logger.LogInformation($"POST api/produto foi solicitado");
 
@@ -99,7 +99,7 @@ namespace APICatalogo.Controllers
         // PUT: ProdutoRepository/Edit/{id}
         [HttpPut("produto/{id}")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult> Edit(int id, [FromBody] ProdutoDTO produtoDto)
+        public async Task<ActionResult> Edit(int id, [FromBody] ProdutoDto produtoDto)
         {
             if (id != produtoDto.ProdutoId)
                 return NotFound("Produto não informado!");
@@ -151,7 +151,7 @@ namespace APICatalogo.Controllers
 
             _logger.LogInformation($"DELETE api/produto foi deletado com sucesso");
 
-            var produtoDto = _mapper.Map<ProdutoDTO>(produto);
+            var produtoDto = _mapper.Map<ProdutoDto>(produto);
 
             return Ok(produtoDto);
         }

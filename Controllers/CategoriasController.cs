@@ -36,18 +36,12 @@ namespace APICatalogo.Controllers
             var conexao = _configuration["ConnectionStrings:DefaultConnection"];
             return $"Autor: {autor} - Conexão: {conexao}";
         }
-
-        [HttpGet("saudacao/{nome}")]
-        public ActionResult<string> GetSaudacao([FromServices] IMeuServico meuServico, [BindRequired] string nome)
-        {
-            return meuServico.Saudacao(nome);
-        }
-
+        
         // GET: Categorias
         [HttpGet("categorias")]
         [HttpGet("teste")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult<IEnumerable<CategoriaDTO>>> GetAll([FromQuery] CategoriaParameters categoriaParameters)
+        public async Task<ActionResult<IEnumerable<CategoriaDto>>> GetAll([FromQuery] CategoriaParameters categoriaParameters)
         {
             _logger.LogInformation($"GET api/categorias foi solicitado");
 
@@ -62,7 +56,7 @@ namespace APICatalogo.Controllers
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(categorias.MetaData));
 
-            var categoriaDTOs = _mapper.Map<List<CategoriaDTO>>(categorias);
+            var categoriaDTOs = _mapper.Map<List<CategoriaDto>>(categorias);
 
             _logger.LogInformation($"GET api/categorias retornou {categorias.Count} categorias");
 
@@ -72,7 +66,7 @@ namespace APICatalogo.Controllers
         // GET: Categorias/Details
         [HttpGet("categoria/{id:int:min(1)}", Name = "ObterProduto")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult<CategoriaDTO>> Details(int? id, [BindRequired] string? name)
+        public async Task<ActionResult<CategoriaDto>> Details(int? id, [BindRequired] string? name)
         {
             _logger.LogInformation($"GET api/categoria/{id} foi solicitado");
 
@@ -92,7 +86,7 @@ namespace APICatalogo.Controllers
 
             _logger.LogInformation($"GET api/categoria/{id} retornou a categoria {Categoria.Nome}");
 
-            var categoriaDTO = _mapper.Map<CategoriaDTO>(Categoria);
+            var categoriaDTO = _mapper.Map<CategoriaDto>(Categoria);
 
             return Ok(categoriaDTO);
         }
@@ -100,7 +94,7 @@ namespace APICatalogo.Controllers
         // GET: Produtos/Categorias
         [HttpGet("produtos/categorias")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public async Task<ActionResult<IEnumerable<ProdutoDTO>>> Produtos([FromQuery] CategoriaParameters categoriaParameters)
+        public async Task<ActionResult<IEnumerable<ProdutoDto>>> Produtos([FromQuery] CategoriaParameters categoriaParameters)
         {
             _logger.LogInformation($"GET api/produtos/categorias foi solicitado");
 
@@ -117,7 +111,7 @@ namespace APICatalogo.Controllers
 
             _logger.LogInformation($"GET api/produtos/categorias retornou {produtos.Count} produtos");
 
-            var produtosDTOs = _mapper.Map<List<ProdutoDTO>>(produtos);
+            var produtosDTOs = _mapper.Map<List<ProdutoDto>>(produtos);
 
             return Ok(produtosDTOs);
         }
@@ -127,7 +121,7 @@ namespace APICatalogo.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost("categoria")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult Create(CategoriaDTO CategoriaDto)
+        public ActionResult Create(CategoriaDto CategoriaDto)
         {
             _logger.LogInformation($"POST api/categoria foi solicitado");
 
@@ -151,7 +145,7 @@ namespace APICatalogo.Controllers
         // PUT: Categorias/Edit/{id}
         [HttpPut("categoria/{id}")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
-        public ActionResult Edit(int id, CategoriaDTO categoriaDto)
+        public ActionResult Edit(int id, CategoriaDto categoriaDto)
         {
             _logger.LogInformation($"PUT api/categoria/{id} foi solicitado");
 
@@ -217,7 +211,7 @@ namespace APICatalogo.Controllers
 
             _logger.LogInformation($"DELETE api/categoria/{id} foi deletado com sucesso");
 
-            var categoriaDto = _mapper.Map<CategoriaDTO>(categoria);
+            var categoriaDto = _mapper.Map<CategoriaDto>(categoria);
 
             return Ok(categoriaDto);
         }

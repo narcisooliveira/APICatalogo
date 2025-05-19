@@ -55,7 +55,7 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddScoped<IMeuServico, MeuServico>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 var mappingConfig = new MapperConfiguration(mc =>

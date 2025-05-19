@@ -7,8 +7,8 @@ namespace APICatalogo.DTOs.Mappings
     {
         public MappingProfile()
         {
-            CreateMap<Categoria, CategoriaDTO>().ReverseMap();
-            CreateMap<Produto, ProdutoDTO>().ReverseMap();
+            CreateMap<Categoria, CategoriaDto>().ReverseMap();
+            CreateMap<Produto, ProdutoDto>().ReverseMap();
         }
     }
 }
