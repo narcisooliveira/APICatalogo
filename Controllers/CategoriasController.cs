@@ -5,6 +5,7 @@ using APICatalogo.Pagination;
 using APICatalogo.Repository;
 using APICatalogo.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
@@ -38,8 +39,8 @@ namespace APICatalogo.Controllers
         }
         
         // GET: Categorias
+        [Authorize]
         [HttpGet("categorias")]
-        [HttpGet("teste")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
         public async Task<ActionResult<IEnumerable<CategoriaDto>>> GetAll([FromQuery] CategoriaParameters categoriaParameters)
         {
