@@ -6,6 +6,7 @@ using APICatalogo.Repository;
 using AutoMapper;
 using APICatalogo.DTOs;
 using APICatalogo.Pagination;
+using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 
 namespace APICatalogo.Controllers
@@ -26,6 +27,7 @@ namespace APICatalogo.Controllers
         }
 
         // GET: ProdutoRepository
+        [Authorize(Policy = "UserOnly")]
         [HttpGet("Produtos")]
         [ServiceFilter(typeof(ApiLoggingFilter))]
         public async Task<ActionResult<IEnumerable<ProdutoDto>>> GetAll([FromQuery] ProdutosParameters produtosParameters)

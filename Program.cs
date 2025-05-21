@@ -81,6 +81,20 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("UserOnly", policy => policy.RequireRole("User"))
+    .AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"))
+    .AddPolicy("MasterOnly", policy => policy.RequireRole("Master")
+        .RequireClaim("Id", "narciso"))
+    .AddPolicy("ExclusiveOnly", policy => policy.RequireRole("Exclusive")
+        .RequireAssertion(context =>
+        {
+            var user = context.User;
+            var hasClaim = user.HasClaim(c => 
+                c is { Type: "Id", Value: "narciso" } || user.IsInRole("Master"));
+            return hasClaim;
+        }));
+
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
